@@ -1,0 +1,174 @@
+{
+  "globals": [
+    
+  ],
+  "triggers": [
+    {
+      "type": "virtualButton",
+      "meta": {
+        "category": "trigger",
+        "name": "virtualButton",
+        "label": "manual trigger",
+        "x": 20,
+        "y": 20,
+        "uiId": "Hy9N1r3Eg",
+        "payload": "",
+        "description": ""
+      },
+      "config": {
+        
+      },
+      "key": "585ebf2b1b29cb0100c8b756-r1FvJH3Nx",
+      "outputIds": [
+        [
+          "rJ_3IBnVx"
+        ]
+      ]
+    },
+    {
+      "type": "timer",
+      "meta": {
+        "category": "trigger",
+        "name": "timer",
+        "label": "every 30s",
+        "x": 220,
+        "y": 20,
+        "uiId": "HJWS_HnEg",
+        "description": ""
+      },
+      "config": {
+        "seconds": 30
+      },
+      "key": "fa81aec0ca0c11e6b377cf9487c4c1da",
+      "outputIds": [
+        [
+          "rJ_3IBnVx"
+        ]
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "type": "DeviceSendCommandNode",
+      "meta": {
+        "category": "output",
+        "name": "device-command",
+        "label": "display",
+        "x": 220,
+        "y": 420,
+        "deviceSelectionType": "direct",
+        "description": ""
+      },
+      "config": {
+        "nameTemplate": "refresh",
+        "payloadTemplate": "{ \"L1\" : \"{{santalocation.city}}\", \"L2\" : \"{{santalocation.region}}\" }",
+        "payloadTemplateType": "json",
+        "sendToDeviceIds": [
+          "585eaf63b32ac10100ad3de2"
+        ],
+        "sendToDeviceTags": [
+          
+        ],
+        "deviceIdsPath": ""
+      },
+      "id": "B1NHkBn4x",
+      "outputIds": [
+        
+      ]
+    },
+    {
+      "type": "HttpNode",
+      "meta": {
+        "category": "data",
+        "name": "http",
+        "label": "santa-api",
+        "x": 120,
+        "y": 140,
+        "description": ""
+      },
+      "config": {
+        "method": "GET",
+        "uriTemplate": "https:\/\/santa-api.appspot.com\/info?client=web&language=en&routeOffset=0&streamOffset=0",
+        "responsePath": "santainfo",
+        "headerInfo": [
+          
+        ]
+      },
+      "id": "rJ_3IBnVx",
+      "outputIds": [
+        [
+          "BynBDS3Ne"
+        ]
+      ]
+    },
+    {
+      "type": "DebugNode",
+      "meta": {
+        "category": "output",
+        "name": "debug",
+        "label": "Debug",
+        "x": 20,
+        "y": 420,
+        "description": ""
+      },
+      "config": {
+        "message": "",
+        "property": ""
+      },
+      "id": "B11CIHhVx",
+      "outputIds": [
+        
+      ]
+    },
+    {
+      "type": "RawFunctionNode",
+      "meta": {
+        "category": "logic",
+        "name": "function",
+        "label": "get last dest",
+        "x": 120,
+        "y": 300,
+        "description": ""
+      },
+      "config": {
+        "script": "var dests = payload.santainfo.body.destinations;\nif (dests.length > 0) {\n  payload.santalocation = dests[dests.length - 1];\n}\nelse {\n  payload.santalocation = {city:'?', region:'?'}\n}"
+      },
+      "id": "HyvXwSnNx",
+      "outputIds": [
+        [
+          "B11CIHhVx",
+          "B1NHkBn4x"
+        ]
+      ]
+    },
+    {
+      "type": "ConditionalNode",
+      "meta": {
+        "category": "logic",
+        "name": "conditional",
+        "label": "HTTP 200?",
+        "x": 120,
+        "y": 220,
+        "description": ""
+      },
+      "config": {
+        "expression": "{{santainfo.statusCode}}==200"
+      },
+      "id": "BynBDS3Ne",
+      "outputIds": [
+        [
+          
+        ],
+        [
+          "HyvXwSnNx"
+        ]
+      ]
+    }
+  ],
+  "name": "Santa Tracker",
+  "enabled": true,
+  "description": "",
+  "applicationId": "585eaf51b32ac10100ad3de1",
+  "_type": "flow",
+  "_exportDate": "2016-12-24T19:17:09.032Z"
+}
