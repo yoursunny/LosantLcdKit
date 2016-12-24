@@ -34,6 +34,31 @@ connect()
 }
 
 void
+handleRefreshCommand(JsonObject& payload)
+{
+  lcd.clear();
+  lcd << payload["L1"].asString();
+  lcd.setCursor(0, 1);
+  lcd << payload["L2"].asString();
+}
+
+void
+handleCommand(LosantCommand* cmd)
+{
+  Serial << "Received command " << cmd->name << ' ';
+  JsonObject& payload = *cmd->payload;
+  payload.printTo(Serial);
+  Serial << endl;
+
+  if (strcmp(cmd->name, "refresh") == 0) {
+    handleRefreshCommand(payload);
+  }
+  else {
+    Serial << "Unknown command" << endl;
+  }
+}
+
+void
 setup()
 {
   Wire.pins(12, 14); // D5-SCL, D6-SDA
@@ -47,16 +72,11 @@ setup()
   WiFi.mode(WIFI_STA);
   WiFi.setSleepMode(WIFI_MODEM_SLEEP);
 
-  lcd.begin(16,2);
+  losantDevice.onCommand(&handleCommand);
+
+  lcd.begin(16, 2);
   lcd.init();
-
   lcd.backlight();
-
-  lcd.setCursor(5, 0);
-  lcd.print("HELLO");
-
-  lcd.setCursor(5, 1);      
-  lcd.print("WORLD");
 }
 
 void
@@ -64,4 +84,5 @@ loop()
 {
   connect();
   losantDevice.loop();
+  delay(100);
 }
