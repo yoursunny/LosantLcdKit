@@ -17,20 +17,35 @@ connect()
   }
 
   Serial << "Connecting to WiFi ";
+  lcd.clear();
+  lcd << "WiFi " << WIFI_SSID;
+  lcd.setCursor(14, 0);
+  lcd << "  ";
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   while (WiFi.status() != WL_CONNECTED) {
+    if (WiFi.status() == WL_CONNECT_FAILED) {
+      WiFi.begin(WIFI_SSID, WIFI_PASS);
+      delay(10000);
+    }
     delay(1000);
     Serial << WiFi.status();
+    lcd.setCursor(15, 0);
+    lcd.print(WiFi.status());
   }
   Serial << endl << "Connected to WiFi " << WiFi.localIP() << endl;
+  lcd.clear();
+  lcd << WiFi.localIP();
 
   Serial << "Connecting to Losant ";
+  lcd.setCursor(0, 1);
+  lcd << "Losant ";
   losantDevice.connectSecure(losantSocket, LOSANT_ACCESS_KEY, LOSANT_ACCESS_SECRET);
   while (!losantDevice.connected()) {
     delay(1000);
     Serial << '.';
   }
   Serial << endl << "Connected to Losant" << endl;
+  lcd << "OK";
 }
 
 void
