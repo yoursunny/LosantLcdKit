@@ -1,0 +1,249 @@
+{
+  "globals": [
+    {
+      "key": "username",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "type": "string"
+    }
+  ],
+  "triggers": [
+    {
+      "config": {
+        
+      },
+      "outputIds": [
+        [
+          "Byuxml1rx"
+        ]
+      ],
+      "key": "585eaf63b32ac10100ad3de2",
+      "type": "deviceIdConnect",
+      "meta": {
+        "category": "trigger",
+        "name": "deviceIdsTagsConnect",
+        "label": "On Connect",
+        "x": 40,
+        "y": 20,
+        "uiId": "rJuCzxyBe",
+        "description": ""
+      }
+    },
+    {
+      "type": "timer",
+      "meta": {
+        "category": "trigger",
+        "name": "timer",
+        "label": "every 15min",
+        "x": 240,
+        "y": 20,
+        "uiId": "rksAMxkrl",
+        "description": ""
+      },
+      "config": {
+        "seconds": 900
+      },
+      "key": "bc67b280cd0211e6a646d33d0cdea296",
+      "outputIds": [
+        [
+          "Byuxml1rx"
+        ]
+      ]
+    },
+    {
+      "type": "virtualButton",
+      "meta": {
+        "category": "trigger",
+        "name": "virtualButton",
+        "label": "Virtual Button",
+        "x": 440,
+        "y": 20,
+        "uiId": "BkACzeyBe",
+        "payload": "",
+        "description": ""
+      },
+      "config": {
+        
+      },
+      "key": "586172c91b29cb0100c8b766-BJN5QgyHg",
+      "outputIds": [
+        [
+          "Byuxml1rx"
+        ]
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "type": "HttpNode",
+      "meta": {
+        "category": "data",
+        "name": "http",
+        "label": "MFP auth",
+        "x": 100,
+        "y": 140,
+        "description": ""
+      },
+      "config": {
+        "method": "POST",
+        "uriTemplate": "http:\/\/www.myfitnesspal.com\/food\/authenticate_diary_password?username={{globals.username}}",
+        "responsePath": "httpMfpAuth",
+        "headerInfo": [
+          
+        ],
+        "bodyTemplate": "password={{globals.password}}"
+      },
+      "id": "Byuxml1rx",
+      "outputIds": [
+        [
+          "HJQ14lJBx"
+        ]
+      ]
+    },
+    {
+      "type": "HttpNode",
+      "meta": {
+        "category": "data",
+        "name": "http",
+        "label": "MFP food",
+        "x": 100,
+        "y": 320,
+        "description": ""
+      },
+      "config": {
+        "method": "GET",
+        "uriTemplate": "http:\/\/www.myfitnesspal.com\/food\/diary\/{{globals.username}}",
+        "responsePath": "httpMfpFood",
+        "headerInfo": [
+          {
+            "key": "Cookie",
+            "valueTemplate": "{{mfpSessionId}}"
+          }
+        ]
+      },
+      "id": "SyEdXekre",
+      "outputIds": [
+        [
+          "H1we_gkre"
+        ]
+      ]
+    },
+    {
+      "type": "RawFunctionNode",
+      "meta": {
+        "category": "logic",
+        "name": "function",
+        "label": "extract sessionId",
+        "x": 100,
+        "y": 220,
+        "description": ""
+      },
+      "config": {
+        "script": "payload.httpMfpAuth.headers['set-cookie'].forEach(function(c){\n  var m = c.match(\/^(_session_id=[^;]+);\/);\n  if (m) {\n    payload.mfpSessionId = m[1];\n  }\n});"
+      },
+      "id": "HJQ14lJBx",
+      "outputIds": [
+        [
+          "SyEdXekre"
+        ]
+      ]
+    },
+    {
+      "type": "DebugNode",
+      "meta": {
+        "category": "output",
+        "name": "debug",
+        "label": "Debug",
+        "x": 400,
+        "y": 440,
+        "description": ""
+      },
+      "config": {
+        "message": "",
+        "property": ""
+      },
+      "id": "SJRWrekSl",
+      "outputIds": [
+        
+      ]
+    },
+    {
+      "type": "RawFunctionNode",
+      "meta": {
+        "category": "logic",
+        "name": "function",
+        "label": "extract remaining",
+        "x": 400,
+        "y": 140,
+        "description": ""
+      },
+      "config": {
+        "script": "var html = payload.httpMfpFood.body;\n\nvar pos0 = html.indexOf('<tr class=\"total remaining\">');\nvar pos1 = html.indexOf('<\/tr>', pos0);\nif (pos0 < 0 || pos1 < 0) {\n  return;\n}\n\nvar tr = html.substring(pos0, pos1);\nvar tds = tr.match(\/<td[^>]+>\\s*(?:<span[^>]+>)?[^<]+<[\/](?:span|td)>\/g);\nif (tds.length != 7) {\n  return;\n}\n\nfunction extractValue(td) {\n  var m = td.match(\/<td[^>]+>\\s*(?:<span[^>]+>)?([^<]+)<[\/](?:span|td)>\/);\n  if (!m) {\n    return 0;\n  }\n  return parseInt(m[1].replace(\/,\/g, ''));\n}\n\npayload.mfpRemaining = {\n  calories: extractValue(tds[1]),\n  carbs: extractValue(tds[2]),\n  fat: extractValue(tds[3]),\n  protein: extractValue(tds[4]),\n  sodium: extractValue(tds[5]),\n  sugar: extractValue(tds[6]),\n};"
+      },
+      "id": "H1we_gkre",
+      "outputIds": [
+        [
+          "HyeB3EWrx"
+        ]
+      ]
+    },
+    {
+      "type": "DeviceSendCommandNode",
+      "meta": {
+        "category": "output",
+        "name": "device-command",
+        "label": "display",
+        "x": 400,
+        "y": 340,
+        "deviceSelectionType": "direct",
+        "description": ""
+      },
+      "config": {
+        "nameTemplate": "refresh",
+        "payloadTemplate": "display",
+        "payloadTemplateType": "path",
+        "sendToDeviceIds": [
+          "585eaf63b32ac10100ad3de2"
+        ],
+        "sendToDeviceTags": [
+          
+        ],
+        "deviceIdsPath": ""
+      },
+      "id": "HkmqkZ1Sg",
+      "outputIds": [
+        [
+          "SJRWrekSl"
+        ]
+      ]
+    },
+    {
+      "type": "RawFunctionNode",
+      "meta": {
+        "category": "logic",
+        "name": "function",
+        "label": "format text",
+        "x": 400,
+        "y": 240,
+        "description": ""
+      },
+      "config": {
+        "script": "function padNumber(n, length) {\n  n = String(Math.round(n));\n  while (n.length < length) {\n    n = ' ' + n;\n  }\n  return n;\n}\n\npayload.display = {\n  L1: 'cal' + padNumber(payload.mfpRemaining.calories, 4) +\n      '|carb' + padNumber(payload.mfpRemaining.carbs, 4),\n  L2: 'fat' + padNumber(payload.mfpRemaining.fat, 4) +\n      '|prot' + padNumber(payload.mfpRemaining.protein, 4)\n};"
+      },
+      "id": "HyeB3EWrx",
+      "outputIds": [
+        [
+          "HkmqkZ1Sg"
+        ]
+      ]
+    }
+  ],
+  "name": "MyFitnessPal",
+  "enabled": true,
+  "description": "This workflow scrapes MyFitnessPal food diary page and displays remaining calories and macronutrients on 2x16 LCD.\nMyFitnessPal diary must be set to \"locked with a key\"; set username and diary password in \"globals\" tab.",
+  "applicationId": "585eaf51b32ac10100ad3de1",
+  "_type": "flow",
+  "_exportDate": "2016-12-28T13:46:14.768Z"
+}
