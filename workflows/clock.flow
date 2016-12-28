@@ -1,0 +1,106 @@
+{
+  "globals": [
+    
+  ],
+  "triggers": [
+    {
+      "type": "timer",
+      "meta": {
+        "category": "trigger",
+        "name": "timer",
+        "label": "Timer",
+        "x": 180,
+        "y": 100,
+        "uiId": "Hkbdo3R4x",
+        "description": ""
+      },
+      "config": {
+        "cron": "0 * * * * *"
+      },
+      "key": "513feaa0cd0611e680894b69ea7b1b54",
+      "outputIds": [
+        [
+          "ryJjj2RNe"
+        ]
+      ]
+    },
+    {
+      "type": "virtualButton",
+      "meta": {
+        "category": "trigger",
+        "name": "virtualButton",
+        "label": "Virtual Button",
+        "x": 380,
+        "y": 100,
+        "uiId": "S1oKj2ANe",
+        "payload": "",
+        "description": ""
+      },
+      "config": {
+        
+      },
+      "key": "58613b5f1b29cb0100c8b765-r1Obn3RNe",
+      "outputIds": [
+        [
+          "ryJjj2RNe"
+        ]
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "type": "RawFunctionNode",
+      "meta": {
+        "category": "logic",
+        "name": "function",
+        "label": "Function",
+        "x": 280,
+        "y": 220,
+        "description": ""
+      },
+      "config": {
+        "script": "String.prototype.padStart = function padStart(maxLength) {\n\tvar slice = String.prototype.slice;\n\n  var S = '' + this;\n\tvar stringLength = S.length;\n\tvar fillString;\n\tif (arguments.length > 1) {\n\t\tfillString = arguments[1];\n\t}\n\tvar filler = typeof fillString === 'undefined' ? '' : '' + fillString;\n\tif (filler === '') {\n\t\tfiller = ' ';\n\t}\n\tvar intMaxLength = Number(maxLength);\n\tif (intMaxLength <= stringLength) {\n\t\treturn S;\n\t}\n\tvar fillLen = intMaxLength - stringLength;\n\twhile (filler.length < fillLen) {\n\t\tvar fLen = filler.length;\n\t\tvar remainingCodeUnits = fillLen - fLen;\n\t\tfiller += fLen > remainingCodeUnits ? slice(filler, 0, remainingCodeUnits) : filler;\n\t}\n\n\tvar truncatedStringFiller = filler.length > fillLen ? slice(filler, 0, fillLen) : filler;\n\treturn truncatedStringFiller + S;\n};\n\nvar dt = new Date(new Date(payload.time).getTime() + (-7 * 3600000));\npayload.fmtTime =\n  String(dt.getFullYear()) +\n  '-' +\n  String(dt.getMonth()).padStart(2, '0') +\n  '-' +\n  String(dt.getDay()).padStart(2, '0') +\n  ' ' +\n  String(dt.getHours()).padStart(2, '0') +\n  ':' +\n  String(dt.getMinutes()).padStart(2, '0');"
+      },
+      "id": "ryJjj2RNe",
+      "outputIds": [
+        [
+          "r1e1nnRNx"
+        ]
+      ]
+    },
+    {
+      "type": "DeviceSendCommandNode",
+      "meta": {
+        "category": "output",
+        "name": "device-command",
+        "label": "Device Command",
+        "x": 280,
+        "y": 320,
+        "deviceSelectionType": "direct",
+        "description": ""
+      },
+      "config": {
+        "nameTemplate": "refresh",
+        "payloadTemplate": "{\"L1\": \"{{fmtTime}}\" }",
+        "payloadTemplateType": "json",
+        "sendToDeviceIds": [
+          "585eaf63b32ac10100ad3de2"
+        ],
+        "sendToDeviceTags": [
+          
+        ],
+        "deviceIdsPath": ""
+      },
+      "id": "r1e1nnRNx",
+      "outputIds": [
+        
+      ]
+    }
+  ],
+  "name": "clock",
+  "enabled": false,
+  "description": "",
+  "applicationId": "585eaf51b32ac10100ad3de1",
+  "_type": "flow",
+  "_exportDate": "2016-12-28T14:03:55.160Z"
+}
