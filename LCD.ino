@@ -22,15 +22,22 @@ connect()
   lcd.setCursor(14, 0);
   lcd << "  ";
   WiFi.begin(WIFI_SSID, WIFI_PASS);
-  while (WiFi.status() != WL_CONNECTED) {
+  for (int i = 0; i < 60 && WiFi.status() != WL_CONNECTED; ++i) {
     if (WiFi.status() == WL_CONNECT_FAILED) {
       WiFi.begin(WIFI_SSID, WIFI_PASS);
-      delay(10000);
     }
     delay(1000);
     Serial << WiFi.status();
     lcd.setCursor(15, 0);
     lcd.print(WiFi.status());
+  }
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial << endl << "Cannot connect to WiFi" << endl;
+    lcd.setCursor(5, 0);
+    lcd << "FAIL";
+    delay(5000);
+    ESP.restart();
+    return;
   }
   Serial << endl << "Connected to WiFi " << WiFi.localIP() << endl;
   lcd.clear();
@@ -40,9 +47,16 @@ connect()
   lcd.setCursor(0, 1);
   lcd << "Losant ";
   losantDevice.connectSecure(losantSocket, LOSANT_ACCESS_KEY, LOSANT_ACCESS_SECRET);
-  while (!losantDevice.connected()) {
+  for (int i = 0; i < 60 && !losantDevice.connected(); ++i) {
     delay(1000);
     Serial << '.';
+  }
+  if (!losantDevice.connected()) {
+    Serial << endl << "Cannot connect to Losant" << endl;
+    lcd << "FAIL";
+    delay(5000);
+    ESP.restart();
+    return;
   }
   Serial << endl << "Connected to Losant" << endl;
   lcd << "OK";
