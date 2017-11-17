@@ -3,11 +3,14 @@
 #include <Losant.h>
 #include <Streaming.h>
 #include "credentials.hpp"
+#include "LosantHtu21df.hpp"
 
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
 WiFiClientSecure losantSocket;
 LosantDevice losantDevice(LOSANT_DEVICE_ID);
+
+LosantHtu21df htu(losantDevice, "celsius", "humidity");
 
 void
 connect()
@@ -90,8 +93,6 @@ handleCommand(LosantCommand* cmd)
 void
 setup()
 {
-  Wire.pins(12, 14); // D5-SCL, D6-SDA
-
   Serial.begin(115200);
   Serial.println();
   Serial.println();
@@ -113,5 +114,6 @@ loop()
 {
   connect();
   losantDevice.loop();
+  htu.loop();
   delay(100);
 }
