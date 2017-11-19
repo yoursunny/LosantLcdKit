@@ -24,6 +24,7 @@ LosantHtu21df::loop()
 
   float celsius = m_sensor->readTemperature();
   float humid = m_sensor->readHumidity();
+  yield();
 
   Serial << "HTU21DF " << celsius << "C " << humid << "%" << endl;
 

@@ -7,7 +7,7 @@
 
 LiquidCrystal_I2C lcd(0x3F, 16, 2);
 
-WiFiClientSecure losantSocket;
+WiFiClient losantSocket;
 LosantDevice losantDevice(LOSANT_DEVICE_ID);
 
 LosantHtu21df htu(losantDevice, "celsius", "humidity");
@@ -24,7 +24,9 @@ connect()
   lcd << "WiFi " << WIFI_SSID;
   lcd.setCursor(14, 0);
   lcd << "  ";
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  if (WiFi.status() != WL_CONNECTED) {
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+  }
   for (int i = 0; i < 60 && WiFi.status() != WL_CONNECTED; ++i) {
     if (WiFi.status() == WL_CONNECT_FAILED) {
       WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -36,8 +38,8 @@ connect()
   }
   if (WiFi.status() != WL_CONNECTED) {
     Serial << endl << "Cannot connect to WiFi" << endl;
-    lcd.setCursor(5, 0);
-    lcd << "FAIL";
+    lcd.clear();
+    lcd << "WiFi FAIL";
     delay(5000);
     ESP.restart();
     return;
@@ -49,7 +51,7 @@ connect()
   Serial << "Connecting to Losant ";
   lcd.setCursor(0, 1);
   lcd << "Losant ";
-  losantDevice.connectSecure(losantSocket, LOSANT_ACCESS_KEY, LOSANT_ACCESS_SECRET);
+  losantDevice.connect(losantSocket, LOSANT_ACCESS_KEY, LOSANT_ACCESS_SECRET);
   for (int i = 0; i < 60 && !losantDevice.connected(); ++i) {
     delay(1000);
     Serial << '.';
